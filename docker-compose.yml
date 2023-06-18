@@ -7,6 +7,14 @@ services:
     ports:
       - "27017"
 
+  db-exporter:
+    image: bitnami/mongodb-exporter:0.11
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017
+    restart: always
+    ports: 
+      - 9216:9216
+
   rabbitmq:
     image: rabbitmq:3-management
     healthcheck:
@@ -148,3 +156,31 @@ services:
       mongo:
         condition: service_started
     restart: on-failure
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus-data:/prometheus
+    ports:
+      - 9090:9090
+    depends_on:
+      - mongo
+      - rabbitmq
+      - api_gateway
+      - auth_service
+      - external_service
+      - target_service
+    command: --web.enable-lifecycle --config.file=/etc/prometheus/prometheus.yml
+
+  grafana:
+    build: ./grafana
+    ports:
+      - 4000:3000
+    volumes:
+      - ./grafana:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+volumes:
+  prometheus-data:

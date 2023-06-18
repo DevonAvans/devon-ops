@@ -1,0 +1,9 @@
+groups:
+  - name: Alert
+    rules:
+      - alert: "On api_gateway down"
+        expr: up{job="api-gateway"} < 1
+        for: 15s
+      - alert: "On mongodb down"
+        expr: up{job="mongodb"} < 1
+        for: 5s
