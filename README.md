@@ -1,3 +1,3 @@
 # cloud-services
 
-ja man
+[![Node.js CI](https://github.com/MelvRooden/devops/actions/workflows/node.js.yml/badge.svg)](https://github.com/MelvRooden/devops/actions/workflows/node.js.yml)

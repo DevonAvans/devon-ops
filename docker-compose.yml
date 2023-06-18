@@ -1,0 +1,152 @@
+version: '3.9'
+
+services:
+  mongo:
+    image: mongo:latest
+    restart: always
+    ports:
+      - "27017"
+    volumes:
+      - ./data/db:/data/db
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  
+  api_gateway:
+    build:
+      context: .
+      dockerfile: api_gateway.dockerfile
+    env_file: ./.env
+    ports:
+      - 3000:3000
+    volumes:
+      - /api_gateway:/api_gateway
+      - /public/uploads:/app/public/uploads
+    environment:
+      API_GATEWAY_URL: ${API_GATEWAY_URL}
+      API_GATEWAY_PORT: ${API_GATEWAY_PORT}
+      AUTH_SERVICE_URL: ${AUTH_SERVICE_URL}
+      AUTH_SERVICE_PORT: ${AUTH_SERVICE_PORT}
+      TARGET_SERVICE_URL: ${TARGET_SERVICE_URL}
+      TARGET_SERVICE_PORT: ${TARGET_SERVICE_PORT}
+      EXTERNAL_SERVICE_URL: ${EXTERNAL_SERVICE_URL}
+      EXTERNAL_SERVICE_PORT: ${EXTERNAL_SERVICE_PORT}
+      OPAQUE_TOKEN: ${OPAQUE_TOKEN}
+      JWT_SECRET: ${JWT_SECRET}
+      AUTH_SERVICE_DB: ${AUTH_SERVICE_DB}
+      TARGET_SERVICE_DB: ${TARGET_SERVICE_DB}
+      EXTERNAL_SERVICE_DB: ${EXTERNAL_SERVICE_DB}
+      RABBIT_MQ: ${RABBIT_MQ}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mongo:
+        condition: service_started
+      auth_service:
+        condition: service_started
+      target_service:
+        condition: service_started
+      external_service:
+        condition: service_started
+    restart: on-failure
+
+  auth_service:
+    build:
+      context: .
+      dockerfile: auth_service.dockerfile
+    env_file: ./.env
+    ports:
+      - 3001:3001
+    volumes:
+      - /auth-service:/auth_service
+      - /public/uploads:/app/public/uploads
+    environment:
+      API_GATEWAY_URL: ${API_GATEWAY_URL}
+      API_GATEWAY_PORT: ${API_GATEWAY_PORT}
+      AUTH_SERVICE_URL: ${AUTH_SERVICE_URL}
+      AUTH_SERVICE_PORT: ${AUTH_SERVICE_PORT}
+      TARGET_SERVICE_URL: ${TARGET_SERVICE_URL}
+      TARGET_SERVICE_PORT: ${TARGET_SERVICE_PORT}
+      EXTERNAL_SERVICE_URL: ${EXTERNAL_SERVICE_URL}
+      EXTERNAL_SERVICE_PORT: ${EXTERNAL_SERVICE_PORT}
+      OPAQUE_TOKEN: ${OPAQUE_TOKEN}
+      JWT_SECRET: ${JWT_SECRET}
+      AUTH_SERVICE_DB: ${AUTH_SERVICE_DB}
+      TARGET_SERVICE_DB: ${TARGET_SERVICE_DB}
+      EXTERNAL_SERVICE_DB: ${EXTERNAL_SERVICE_DB}
+      RABBIT_MQ: ${RABBIT_MQ}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mongo:
+        condition: service_started
+    restart: on-failure
+
+  target_service:
+    build:
+      context: .
+      dockerfile: target_service.dockerfile
+    env_file: ./.env
+    ports:
+      - 3002:3002
+    volumes:
+      - /target-service:/target_service
+      - /public/uploads:/app/public/uploads
+    environment:
+      API_GATEWAY_URL: ${API_GATEWAY_URL}
+      API_GATEWAY_PORT: ${API_GATEWAY_PORT}
+      AUTH_SERVICE_URL: ${AUTH_SERVICE_URL}
+      AUTH_SERVICE_PORT: ${AUTH_SERVICE_PORT}
+      TARGET_SERVICE_URL: ${TARGET_SERVICE_URL}
+      TARGET_SERVICE_PORT: ${TARGET_SERVICE_PORT}
+      EXTERNAL_SERVICE_URL: ${EXTERNAL_SERVICE_URL}
+      EXTERNAL_SERVICE_PORT: ${EXTERNAL_SERVICE_PORT}
+      OPAQUE_TOKEN: ${OPAQUE_TOKEN}
+      JWT_SECRET: ${JWT_SECRET}
+      AUTH_SERVICE_DB: ${AUTH_SERVICE_DB}
+      TARGET_SERVICE_DB: ${TARGET_SERVICE_DB}
+      EXTERNAL_SERVICE_DB: ${EXTERNAL_SERVICE_DB}
+      RABBIT_MQ: ${RABBIT_MQ}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mongo:
+        condition: service_started
+    restart: on-failure
+
+  external_service:
+    build:
+      context: .
+      dockerfile: external_service.dockerfile
+    env_file: ./.env
+    ports:
+      - 3003:3003
+    volumes:
+      - /external-service:/external_service
+      - /public/uploads:/app/public/uploads
+    environment:
+      API_GATEWAY_URL: ${API_GATEWAY_URL}
+      API_GATEWAY_PORT: ${API_GATEWAY_PORT}
+      AUTH_SERVICE_URL: ${AUTH_SERVICE_URL}
+      AUTH_SERVICE_PORT: ${AUTH_SERVICE_PORT}
+      TARGET_SERVICE_URL: ${TARGET_SERVICE_URL}
+      TARGET_SERVICE_PORT: ${TARGET_SERVICE_PORT}
+      EXTERNAL_SERVICE_URL: ${EXTERNAL_SERVICE_URL}
+      EXTERNAL_SERVICE_PORT: ${EXTERNAL_SERVICE_PORT}
+      OPAQUE_TOKEN: ${OPAQUE_TOKEN}
+      JWT_SECRET: ${JWT_SECRET}
+      AUTH_SERVICE_DB: ${AUTH_SERVICE_DB}
+      TARGET_SERVICE_DB: ${TARGET_SERVICE_DB}
+      EXTERNAL_SERVICE_DB: ${EXTERNAL_SERVICE_DB}
+      RABBIT_MQ: ${RABBIT_MQ}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mongo:
+        condition: service_started
+    restart: on-failure
