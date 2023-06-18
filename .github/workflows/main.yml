@@ -1,0 +1,45 @@
+on:
+  push:
+    branches:
+      - main
+
+name: oktetoPipeline
+
+jobs:
+  devflow:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@main
+
+    - name: context
+      uses: okteto/context@latest
+      with:
+        token: ${{ secrets.OKTETO_TOKEN }}
+
+    - name: "Activate Namespace"
+      uses: okteto/namespace@latest
+      with:
+        namespace: devonavans
+
+    - name: "Trigger the pipeline"
+      uses: okteto/pipeline@latest
+      with:
+        name: devops
+        timeout: 8m
+        skipIfExists: false
+        variables: |
+          API_GATEWAY_URL=http://127.0.0.1:3000
+          API_GATEWAY_PORT=3000
+          AUTH_SERVICE_URL=http://auth_service:3001
+          AUTH_SERVICE_PORT=3001
+          TARGET_SERVICE_URL=http://target_service:3002
+          TARGET_SERVICE_PORT=3002
+          EXTERNAL_SERVICE_URL=http://external_service:3003
+          EXTERNAL_SERVICE_PORT=3003
+          OPAQUE_TOKEN=0681275556
+          JWT_SECRET=melsslaapritme
+          AUTH_SERVICE_DB=mongodb://mongo:27017/auth
+          TARGET_SERVICE_DB=mongodb://mongo:27017/target
+          EXTERNAL_SERVICE_DB=mongodb://mongo:27017/external
+          RABBIT_MQ=amqp://rabbitmq:5672
