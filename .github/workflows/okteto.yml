@@ -20,7 +20,7 @@ jobs:
     - name: "Activate Namespace"
       uses: okteto/namespace@latest
       with:
-        namespace: melvrooden
+        namespace: devonavans
 
     - name: "Trigger the pipeline"
       uses: okteto/pipeline@latest
